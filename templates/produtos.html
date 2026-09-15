@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <header>
+        <h1>Gerenciador de Produtos</h1>
+        <nav>
+            <a href="/">Dashboard</a>
+            <a href="/produtos" class="ativo">Produtos</a>
+            <a href="/clientes">Clientes</a>
+            <a href="/vendedores">Vendedores</a>
+            <a href="/vendas">Vendas</a>
+            <a href="/logout">Sair</a>
+        </nav>
+    </header>
+    <main>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="flash-messages">
+              {% for message in messages %}
+                <p style="margin:0;">{{ message }}</p>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+        <section class="form-section">
+            <h2>Adicionar Produto</h2>
+            <form action="/add_product" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <label for="marca">Marca:</label>
+                <input type="text" id="marca" name="marca" required>
+
+                <label for="nome">Nome:</label>
+                <input type="text" id="nome" name="nome" required>
+
+                <label for="sabor">Sabor:</label>
+                <input type="text" id="sabor" name="sabor" required>
+
+                <label for="valor">Valor:</label>
+                <input type="number" id="valor" name="valor" step="0.01" min="0" required>
+
+                <label for="quantidade">Quantidade:</label>
+                <input type="number" id="quantidade" name="quantidade" min="0" required>
+
+                <button type="submit">Adicionar Produto</button>
+            </form>
+        </section>
+        <section class="table-section">
+            <h2>Lista de Produtos</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Marca</th>
+                        <th>Nome</th>
+                        <th>Sabor</th>
+                        <th>Valor</th>
+                        <th>Quantidade</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if produtos %}
+                    {% for produto in produtos %}
+                    <tr>
+                        <td>{{ produto[0] }}</td>
+                        <td>{{ produto[1] }}</td>
+                        <td>{{ produto[2] }}</td>
+                        <td>{{ produto[3] }}</td>
+                        <td>R$ {{ "%.2f"|format(produto[4]) }}</td>
+                        <td>{{ produto[5] }}</td>
+                        <td>
+                            <form action="/delete_product/{{ produto[0] }}" method="POST" onsubmit="return confirm('Remover este produto?')">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn-remover">Remover</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="7">Nenhum produto cadastrado.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+    <footer>
+        <p>© desenvolvido por: Willame Silva - 2026 Gerenciador de Produtos</p>
+    </footer>
+</body>
+
+</html>

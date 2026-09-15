@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+  <header>
+    <h1>Gerenciador de Produtos</h1>
+    <nav>
+      <a href="/" class="ativo">Dashboard</a>
+      <a href="/produtos">Produtos</a>
+      <a href="/clientes">Clientes</a>
+      <a href="/vendedores">Vendedores</a>
+      <a href="/vendas">Vendas</a>
+      <a href="/logout">Sair</a>
+    </nav>
+  </header>
+  <main>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for message in messages %}
+            <p style="margin:0;">{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <section class="cards-grid">
+      <div class="stat-card">
+        <span class="stat-label">Produtos cadastrados</span>
+        <span class="stat-value">{{ total_produtos }}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Clientes</span>
+        <span class="stat-value">{{ total_clientes }}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Vendedores</span>
+        <span class="stat-value">{{ total_vendedores }}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Vendas realizadas</span>
+        <span class="stat-value">{{ total_vendas }}</span>
+      </div>
+      <div class="stat-card destaque">
+        <span class="stat-label">Receita total</span>
+        <span class="stat-value">R$ {{ "%.2f"|format(receita_total) }}</span>
+      </div>
+      <div class="stat-card destaque">
+        <span class="stat-label">Vendas hoje</span>
+        <span class="stat-value">{{ qtd_vendas_hoje }} (R$ {{ "%.2f"|format(receita_hoje) }})</span>
+      </div>
+    </section>
+
+    <section class="table-section">
+      <h2>Estoque baixo (≤ 5 unidades)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Marca</th>
+            <th>Nome</th>
+            <th>Sabor</th>
+            <th>Quantidade</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if estoque_baixo %}
+          {% for p in estoque_baixo %}
+          <tr>
+            <td>{{ p[1] }}</td>
+            <td>{{ p[2] }}</td>
+            <td>{{ p[3] }}</td>
+            <td class="{{ 'alerta-critico' if p[5] == 0 else 'alerta' }}">{{ p[5] }}</td>
+          </tr>
+          {% endfor %}
+          {% else %}
+          <tr>
+            <td colspan="4">Nenhum produto com estoque baixo.</td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="table-section">
+      <h2>Últimas vendas</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Vendedor</th>
+            <th>Data</th>
+            <th>Total</th>
+            <th>Detalhes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if ultimas_vendas %}
+          {% for venda in ultimas_vendas %}
+          <tr>
+            <td>{{ venda[0] }}</td>
+            <td>{{ venda[1] }}</td>
+            <td>{{ venda[2] }}</td>
+            <td>{{ venda[3] }}</td>
+            <td>R$ {{ "%.2f"|format(venda[4]) }}</td>
+            <td><a href="/venda/{{ venda[0] }}" class="btn-detalhe">Ver</a></td>
+          </tr>
+          {% endfor %}
+          {% else %}
+          <tr>
+            <td colspan="6">Nenhuma venda registrada ainda.</td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="table-section">
+      <h2>Produtos mais vendidos</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Marca</th>
+            <th>Quantidade vendida</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if top_produtos %}
+          {% for p in top_produtos %}
+          <tr>
+            <td>{{ p[0] }}</td>
+            <td>{{ p[1] }}</td>
+            <td>{{ p[2] }}</td>
+          </tr>
+          {% endfor %}
+          {% else %}
+          <tr>
+            <td colspan="3">Sem dados de vendas ainda.</td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </section>
+  </main>
+  <footer>
+    <p>© desenvolvido por: Willame Silva - 2026 Gerenciador de Produtos</p>
+  </footer>
+</body>
+
+</html>

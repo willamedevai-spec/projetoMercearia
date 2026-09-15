@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Gerenciador de Produtos</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    .login-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #0057b8;
+    }
+    .login-container {
+      width: 100%;
+      max-width: 400px;
+      background: white;
+      padding: 2.5rem;
+      border-radius: 8px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+    .flash-messages {
+      color: #c0392b;
+      text-align: center;
+      font-weight: bold;
+      background: #fdd;
+      padding: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body class="login-wrapper">
+  <div class="login-container">
+    <h2 style="text-align: center; color: #0057b8;">Acesso ao Sistema</h2>
+
+    <!-- Mostra mensagem de erro (flash) caso erre a senha -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for message in messages %}
+            <p style="margin:0;">{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form action="/login" method="POST" style="margin-top: 1.5rem;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="username">Usuário</label>
+      <input type="text" id="username" name="username" placeholder="Digite seu usuário" required>
+
+      <label for="password">Senha</label>
+      <input type="password" id="password" name="password" placeholder="Digite sua senha" required>
+
+      <button type="submit" style="margin-top: 1rem; padding: 10px; font-size: 1.1rem;">Entrar</button>
+    </form>
+  </div>
+</body>
+</html>

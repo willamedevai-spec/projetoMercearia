@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendas</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+  <header>
+    <h1>Gerenciador de Produtos</h1>
+    <nav>
+      <a href="/">Dashboard</a>
+      <a href="/produtos">Produtos</a>
+      <a href="/clientes">Clientes</a>
+      <a href="/vendedores">Vendedores</a>
+      <a href="/vendas" class="ativo">Vendas</a>
+      <a href="/logout">Sair</a>
+    </nav>
+  </header>
+  <main>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for message in messages %}
+            <p style="margin:0;">{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    <section class="form-section">
+      <h2>Registrar Venda</h2>
+      <form action="/add_venda" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="cliente_id">Cliente:</label>
+        <select id="cliente_id" name="cliente_id" required>
+          <option value="">Selecione um cliente</option>
+          {% for cliente in clientes %}
+          <option value="{{ cliente[0] }}">{{ cliente[1] }}</option>
+          {% endfor %}
+        </select>
+
+        <label for="vendedor_id">Vendedor:</label>
+        <select id="vendedor_id" name="vendedor_id" required>
+          <option value="">Selecione um vendedor</option>
+          {% for vendedor in vendedores %}
+          <option value="{{ vendedor[0] }}">{{ vendedor[1] }}</option>
+          {% endfor %}
+        </select>
+
+        <label>Itens da Venda:</label>
+        <div id="itens-container">
+          <div class="item-venda">
+            <select name="produto_id[]" required>
+              <option value="">Selecione um produto</option>
+              {% for produto in produtos %}
+              <option value="{{ produto[0] }}">
+                {{ produto[1] }} - {{ produto[2] }} ({{ produto[3] }}) — R$ {{ "%.2f"|format(produto[4]) }} | Estoque: {{ produto[5] }}
+              </option>
+              {% endfor %}
+            </select>
+            <input type="number" name="quantidade[]" placeholder="Qtd" min="1" required>
+          </div>
+        </div>
+
+        <button type="button" onclick="adicionarItem()">+ Adicionar Item</button>
+        <button type="submit">Registrar Venda</button>
+      </form>
+    </section>
+    <section class="table-section">
+      <h2>Histórico de Vendas</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Vendedor</th>
+            <th>Data</th>
+            <th>Total</th>
+            <th>Detalhes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for venda in vendas %}
+          <tr>
+            <td>{{ venda[0] }}</td>
+            <td>{{ venda[1] }}</td>
+            <td>{{ venda[2] }}</td>
+            <td>{{ venda[3] }}</td>
+            <td>R$ {{ "%.2f"|format(venda[4]) }}</td>
+            <td><a href="#" onclick="abrirModal({{ venda[0] }}); return false;" class="btn-detalhe">Ver</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </main>
+  <footer>
+    <p>© desenvolvido por: Willame Silva - 2026 Gerenciador de Produtos</p>
+  </footer>
+
+  <div id="modalDetalheVenda" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="fecharModal()">&times;</span>
+      <h2>Detalhes da Venda #<span id="modal-venda-id"></span></h2>
+      <div class="modal-info">
+        <p><strong>Cliente:</strong> <span id="modal-cliente"></span></p>
+        <p><strong>Vendedor:</strong> <span id="modal-vendedor"></span></p>
+        <p><strong>Data:</strong> <span id="modal-data"></span></p>
+        <p><strong>Total:</strong> R$ <span id="modal-total"></span></p>
+      </div>
+
+      <section class="table-section" style="margin-top: 1rem;">
+        <h3>Itens da Venda</h3>
+        <table class="tabela-detalhe">
+          <thead>
+            <tr>
+              <th>Marca</th>
+              <th>Nome</th>
+              <th>Sabor</th>
+              <th>Qtd</th>
+              <th>Valor Unit.</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody id="modal-itens-tbody">
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    function adicionarItem() {
+      const container = document.getElementById('itens-container');
+      const primeiroItem = container.querySelector('.item-venda');
+      const novoItem = primeiroItem.cloneNode(true);
+
+      novoItem.querySelector('select').value = '';
+      novoItem.querySelector('input').value = '';
+
+      const btnRemover = document.createElement('button');
+      btnRemover.type = 'button';
+      btnRemover.textContent = '✕';
+      btnRemover.className = 'btn-remover-item';
+      btnRemover.onclick = () => novoItem.remove();
+      novoItem.appendChild(btnRemover);
+
+      container.appendChild(novoItem);
+    }
+
+    async function abrirModal(id) {
+      try {
+        const response = await fetch(`/api/venda/${id}`);
+        if (!response.ok) throw new Error('Erro ao buscar detalhes da venda');
+        const data = await response.json();
+
+        document.getElementById('modal-venda-id').textContent = data.venda.id;
+        document.getElementById('modal-cliente').textContent = data.venda.cliente;
+        document.getElementById('modal-vendedor').textContent = data.venda.vendedor;
+        document.getElementById('modal-data').textContent = data.venda.data;
+        document.getElementById('modal-total').textContent = data.venda.total.toFixed(2);
+
+        const tbody = document.getElementById('modal-itens-tbody');
+        tbody.innerHTML = '';
+        data.itens.forEach(item => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${item.marca}</td>
+            <td>${item.nome}</td>
+            <td>${item.sabor}</td>
+            <td>${item.quantidade}</td>
+            <td>R$ ${item.valor_unitario.toFixed(2)}</td>
+            <td>R$ ${item.subtotal.toFixed(2)}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        document.getElementById('modalDetalheVenda').style.display = 'flex';
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    function fecharModal() {
+      document.getElementById('modalDetalheVenda').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+      const modal = document.getElementById('modalDetalheVenda');
+      if (event.target == modal) {
+        fecharModal();
+      }
+    }
+  </script>
+</body>
+
+</html>

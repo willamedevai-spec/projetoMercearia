@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendedores</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+  <header>
+    <h1>Gerenciador de Produtos</h1>
+    <nav>
+      <a href="/">Dashboard</a>
+      <a href="/produtos">Produtos</a>
+      <a href="/clientes">Clientes</a>
+      <a href="/vendedores" class="ativo">Vendedores</a>
+      <a href="/vendas">Vendas</a>
+      <a href="/logout">Sair</a>
+    </nav>
+  </header>
+  <main>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for message in messages %}
+            <p style="margin:0;">{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    <section class="form-section">
+      <h2>Cadastrar Vendedor</h2>
+      <form action="/add_vendedor" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome" required>
+
+        <label for="cpf">CPF:</label>
+        <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" required>
+
+        <label for="telefone">Telefone:</label>
+        <input type="text" id="telefone" name="telefone" placeholder="(00) 00000-0000" required>
+
+        <button type="submit">Cadastrar Vendedor</button>
+      </form>
+    </section>
+    <section class="table-section">
+      <h2>Lista de Vendedores</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>Telefone</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if vendedores %}
+          {% for vendedor in vendedores %}
+          <tr>
+            <td>{{ vendedor[0] }}</td>
+            <td>{{ vendedor[1] }}</td>
+            <td>{{ vendedor[2] }}</td>
+            <td>{{ vendedor[3] }}</td>
+            <td>
+              <form action="/delete_vendedor/{{ vendedor[0] }}" method="POST" onsubmit="return confirm('Remover este vendedor?')">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn-remover">Remover</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+          {% else %}
+          <tr>
+            <td colspan="5">Nenhum vendedor cadastrado.</td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </section>
+  </main>
+  <footer>
+    <p>© desenvolvido por: Willame Silva - 2026 Gerenciador de Produtos</p>
+  </footer>
+</body>
+
+</html>
