@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalhe da Venda #{{ venda[0] }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+  <header>
+    <h1>Gerenciador de Produtos</h1>
+    <nav>
+      <a href="/">Dashboard</a>
+      <a href="/produtos">Produtos</a>
+      <a href="/clientes">Clientes</a>
+      <a href="/vendedores">Vendedores</a>
+      <a href="/vendas" class="ativo">Vendas</a>
+      <a href="/logout">Sair</a>
+    </nav>
+  </header>
+  <main>
+    <section class="form-section">
+      <h2>Venda #{{ venda[0] }}</h2>
+      <table class="tabela-detalhe">
+        <tr>
+          <th>Cliente</th>
+          <td>{{ venda[1] }}</td>
+        </tr>
+        <tr>
+          <th>Vendedor</th>
+          <td>{{ venda[2] }}</td>
+        </tr>
+        <tr>
+          <th>Data</th>
+          <td>{{ venda[3] }}</td>
+        </tr>
+        <tr>
+          <th>Total</th>
+          <td>R$ {{ "%.2f"|format(venda[4]) }}</td>
+        </tr>
+      </table>
+    </section>
+    <section class="table-section">
+      <h2>Itens da Venda</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Marca</th>
+            <th>Nome</th>
+            <th>Sabor</th>
+            <th>Quantidade</th>
+            <th>Valor Unit.</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in itens %}
+          <tr>
+            <td>{{ item[0] }}</td>
+            <td>{{ item[1] }}</td>
+            <td>{{ item[2] }}</td>
+            <td>{{ item[3] }}</td>
+            <td>R$ {{ "%.2f"|format(item[4]) }}</td>
+            <td>R$ {{ "%.2f"|format(item[5]) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class="total-detalhe">
+        <strong>Total: R$ {{ "%.2f"|format(venda[4]) }}</strong>
+      </div>
+    </section>
+    <div style="text-align:center; margin-top: 1rem;">
+      <a href="/vendas" class="btn-detalhe">← Voltar para Vendas</a>
+    </div>
+  </main>
+  <footer>
+    <p>© desenvolvido por: Willame Silva - 2026 Gerenciador de Produtos</p>
+  </footer>
+</body>
+
+</html>
